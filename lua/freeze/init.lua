@@ -1,3 +1,5 @@
+local themes = require("freeze.themes")
+
 local M = {}
 
 ---@alias freeze.Lines number|[number, number]
@@ -14,7 +16,7 @@ local defaults = {
   output = function()
     return vim.fn.tempname() .. ".png"
   end,
-  theme = require("freeze.themes").tokyonight_storm,
+  theme = themes.tokyonight_storm,
 }
 
 ---@param lines freeze.Lines
@@ -87,6 +89,34 @@ M.generate = function(opts)
   run_cmd(freeze_cmd(flags), function()
     run_cmd(copy_cmd(flags.output))
   end)
+end
+
+---@param opts? freeze.Options
+M.setup = function(opts)
+  vim.api.nvim_create_user_command(
+    "Freeze",
+    ---@param tbl { args: string, line1: number, line2: number }
+    function(tbl)
+      if tbl.args ~= "" then
+        local theme = themes[tbl.args]
+        if theme == nil then
+          vim.notify(string.format("Theme '%s' not found", theme), vim.logs.levels.ERROR)
+          return
+        end
+        opts.theme = theme
+      end
+      opts.lines = { tbl.line1, tbl.line2 }
+      M.generate(opts)
+    end,
+    {
+      desc = "Generate and copy an image of the text provided via a range or a selection (powered by freeze)",
+      range = true,
+      nargs = "?",
+      complete = function()
+        return vim.tbl_keys(themes)
+      end,
+    }
+  )
 end
 
 return M
