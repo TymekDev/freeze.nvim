@@ -19,7 +19,7 @@ A plugin wrapping [`freeze`](https://github.com/charmbracelet/freeze) into a `:F
 _Annotations are optional._
 
 ```lua
----@module "freeze"
+---@module "lazy"
 ---@type LazySpec
 {
   "TymekDev/freeze.nvim",
